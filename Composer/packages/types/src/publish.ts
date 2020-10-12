@@ -31,11 +31,6 @@ export type PullResponse = {
   zipPath?: string;
 };
 
-export type PublishAuthHelpers = {
-  getAccessToken: (options) => Promise<string>;
-  loginAndGetIdToken: (options) => Promise<string>;
-};
-
 // TODO: Add types for project, metadata
 export type PublishPlugin<Config = any> = {
   // methods plugins should support
@@ -45,13 +40,13 @@ export type PublishPlugin<Config = any> = {
     project: IBotProject,
     metadata: any,
     user?: UserIdentity,
-    authHelpers?: PublishAuthHelpers
+    getAccessToken?: (options) => Promise<string>
   ) => Promise<PublishResponse>;
   getStatus?: (
     config: Config,
     project: IBotProject,
     user?: UserIdentity,
-    authHelpers?: PublishAuthHelpers
+    getAccessToken?: (options) => Promise<string>
   ) => Promise<PublishResponse>;
   getHistory?: (config: Config, project: IBotProject, user?: UserIdentity) => Promise<PublishResult[]>;
   rollback?: (
@@ -64,7 +59,7 @@ export type PublishPlugin<Config = any> = {
     config: Config,
     project: IBotProject,
     user?: UserIdentity,
-    authHelpers?: PublishAuthHelpers
+    getAccessToken?: (options) => Promise<string>
   ) => Promise<PullResponse>;
 
   // other properties

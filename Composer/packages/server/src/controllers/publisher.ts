@@ -9,8 +9,8 @@ import { ensureDirSync, removeSync } from 'fs-extra';
 import extractZip from 'extract-zip';
 
 import { BotProjectService } from '../services/project';
-import { useElectronContext } from '../utility/electronContext';
 import { copyDir } from '../utility/storage';
+import { authService } from '../services/auth';
 
 function extensionImplementsMethod(extensionName: string, methodName: string): boolean {
   return extensionName && ExtensionContext.extensions.publish[extensionName]?.methods[methodName];
@@ -69,11 +69,14 @@ export const PublishController = {
 
       try {
         // call the method
-        const { getAccessToken, loginAndGetIdToken } = useElectronContext();
-        const results = await pluginMethod.call(null, configuration, currentProject, metadata, user, {
-          getAccessToken,
-          loginAndGetIdToken,
-        });
+        const results = await pluginMethod.call(
+          null,
+          configuration,
+          currentProject,
+          metadata,
+          user,
+          authService.getAccessToken
+        );
 
         // copy status into payload for ease of access in client
         const response = {
@@ -120,11 +123,7 @@ export const PublishController = {
         };
 
         // call the method
-        const { getAccessToken, loginAndGetIdToken } = useElectronContext();
-        const results = await pluginMethod.call(null, configuration, currentProject, user, {
-          getAccessToken,
-          loginAndGetIdToken,
-        });
+        const results = await pluginMethod.call(null, configuration, currentProject, user, authService.getAccessToken);
         // update the eTag if the publish was completed and an eTag is provided
         if (results.status === 200 && results.result?.eTag) {
           BotProjectService.setETagForProject(results.result.eTag, projectId);
@@ -169,11 +168,7 @@ export const PublishController = {
         };
 
         // call the method
-        const { getAccessToken, loginAndGetIdToken } = useElectronContext();
-        const results = await pluginMethod.call(null, configuration, currentProject, user, {
-          getAccessToken,
-          loginAndGetIdToken,
-        });
+        const results = await pluginMethod.call(null, configuration, currentProject, user, authService.getAccessToken);
 
         // set status and return value as json
         return res.status(200).json(results);
@@ -325,11 +320,13 @@ export const PublishController = {
       if (typeof pluginMethod === 'function') {
         try {
           // call the method
-          const { getAccessToken, loginAndGetIdToken } = useElectronContext();
-          const results = await pluginMethod.call(null, configuration, currentProject, user, {
-            getAccessToken,
-            loginAndGetIdToken,
-          });
+          const results = await pluginMethod.call(
+            null,
+            configuration,
+            currentProject,
+            user,
+            authService.getAccessToken
+          );
           if (results.status === 500) {
             // something went wrong
             console.error(results.error?.message);
