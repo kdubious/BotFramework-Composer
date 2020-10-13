@@ -75,7 +75,7 @@ export const PublishController = {
           currentProject,
           metadata,
           user,
-          authService.getAccessToken
+          authService.getAccessToken.bind(authService)
         );
 
         // copy status into payload for ease of access in client
@@ -123,7 +123,13 @@ export const PublishController = {
         };
 
         // call the method
-        const results = await pluginMethod.call(null, configuration, currentProject, user, authService.getAccessToken);
+        const results = await pluginMethod.call(
+          null,
+          configuration,
+          currentProject,
+          user,
+          authService.getAccessToken.bind(authService)
+        );
         // update the eTag if the publish was completed and an eTag is provided
         if (results.status === 200 && results.result?.eTag) {
           BotProjectService.setETagForProject(results.result.eTag, projectId);
@@ -168,7 +174,13 @@ export const PublishController = {
         };
 
         // call the method
-        const results = await pluginMethod.call(null, configuration, currentProject, user, authService.getAccessToken);
+        const results = await pluginMethod.call(
+          null,
+          configuration,
+          currentProject,
+          user,
+          authService.getAccessToken.bind(authService)
+        );
 
         // set status and return value as json
         return res.status(200).json(results);
@@ -325,7 +337,7 @@ export const PublishController = {
             configuration,
             currentProject,
             user,
-            authService.getAccessToken
+            authService.getAccessToken.bind(authService)
           );
           if (results.status === 500) {
             // something went wrong
